@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -Wall -Wextra -std=c++20 -Iinc -Ithirdparty
+CXXFLAGS := -Wall -std=c++20 -Iinc -Ithirdparty
 CXXLIBS := -lvulkan -lglfw
 CSHADER := glslc
 

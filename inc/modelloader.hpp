@@ -22,5 +22,6 @@ namespace democollection
 		inline const std::vector<vk::Vertex>& Vertices() const { return vertices; }
 		inline const std::vector<uint32_t>& Indices() const { return indices; }
 		inline const std::vector<MaterialData>& Materials() const { return materials; }
+		inline const std::vector<vk::Bone>& Skeleton() const { return skeleton; }
 	};
 }

@@ -52,11 +52,11 @@ namespace democollection
 		return PmxLoader::Status::Ok;
 	}
 
-	uint32_t PmxLoader::Header::ReadGlobalIndex(std::ifstream& infile, GlobalIndex idx) const
+	int PmxLoader::Header::ReadGlobalIndex(std::ifstream& infile, GlobalIndex idx) const
 	{
-		uint32_t retVal = 0;
-		READ_SOME(&retVal, globals[idx]);
-		return retVal;
+		int i = 0;
+		READ_SOME(&i, globals[idx]);
+		return i;
 	}
 
 	PmxLoader::Status PmxLoader::Header::ReadHeader(std::ifstream& infile)
@@ -90,12 +90,16 @@ namespace democollection
 			return text;
 		}
 	}
-	uint32_t PmxLoader::Header::ReadVertexIndex(std::ifstream& infile) const { return ReadGlobalIndex(infile, VertexIndexSize); }
-	uint32_t PmxLoader::Header::ReadTextureIndex(std::ifstream& infile) const { return ReadGlobalIndex(infile, TextureIndexSize); }
-	uint32_t PmxLoader::Header::ReadMaterialIndex(std::ifstream& infile) const { return ReadGlobalIndex(infile, MaterialIndexSize); }
-	uint32_t PmxLoader::Header::ReadBoneIndex(std::ifstream& infile) const { return ReadGlobalIndex(infile, BoneIndexSize); }
-	uint32_t PmxLoader::Header::ReadMorphIndex(std::ifstream& infile) const { return ReadGlobalIndex(infile, MorphIndexSize); }
-	uint32_t PmxLoader::Header::ReadRigidBodyIndex(std::ifstream& infile) const { return ReadGlobalIndex(infile, RigidBodyIndexSize); }
+	int PmxLoader::Header::ReadVertexIndex(std::ifstream& infile) const { return ReadGlobalIndex(infile, VertexIndexSize); }
+	int PmxLoader::Header::ReadTextureIndex(std::ifstream& infile) const { return ReadGlobalIndex(infile, TextureIndexSize); }
+	int PmxLoader::Header::ReadMaterialIndex(std::ifstream& infile) const { return ReadGlobalIndex(infile, MaterialIndexSize); }
+	int PmxLoader::Header::ReadBoneIndex(std::ifstream& infile) const
+	{
+		const int leadingZeros = 32 - (globals[BoneIndexSize] * 8);
+		return ReadGlobalIndex(infile, BoneIndexSize) << leadingZeros >> leadingZeros;
+	}
+	int PmxLoader::Header::ReadMorphIndex(std::ifstream& infile) const { return ReadGlobalIndex(infile, MorphIndexSize); }
+	int PmxLoader::Header::ReadRigidBodyIndex(std::ifstream& infile) const { return ReadGlobalIndex(infile, RigidBodyIndexSize); }
 
 	PmxLoader::Status PmxLoader::Material::Read(std::ifstream& infile, const PmxLoader::Header& header)
 	{
@@ -131,6 +135,49 @@ namespace democollection
 		return PmxLoader::Status::Ok;
 	}
 
+	PmxLoader::Status PmxLoader::Bone::Read(std::ifstream& infile, const Header& header)
+	{
+		jpName = header.ReadText(infile);
+		enName = header.ReadText(infile);
+		READ(position);
+		parentIndex = header.ReadBoneIndex(infile);
+		READ(layer);
+		READ(flags);
+		if (flags & BoneFlags::IndexedTailPosition)
+			tailPosition.boneIndex = header.ReadBoneIndex(infile);
+		else
+			READ(tailPosition.position);
+		if (flags & (BoneFlags::InheritRotation | BoneFlags::InheritTranslation))
+		{
+			inheritBone.parentIndex = header.ReadBoneIndex(infile);
+			READ(inheritBone.influenceWeight);
+		}
+		if (flags & BoneFlags::FixedAxis)
+			READ(fixedAxis);
+		if (flags & BoneFlags::LocalCoordinate)
+			READ(localCoordinate);
+		if (flags & BoneFlags::ExternalParentDeform)
+			externalParent.parentIndex = header.ReadBoneIndex(infile);
+		if (flags & BoneFlags::InverseKinematics)
+		{
+			inverseKinematics.targetIndex = header.ReadBoneIndex(infile);
+			READ(inverseKinematics.loopCount);
+			READ(inverseKinematics.limitRadian);
+			uint32_t linkCount = 0;
+			READ(linkCount);
+			inverseKinematics.ikLinks.resize(linkCount);
+			for (IkLinks& link : inverseKinematics.ikLinks)
+			{
+				link.boneIndex = header.ReadBoneIndex(infile);
+				READ(link.hasLimits);
+				if (link.hasLimits)
+					READ(link.limits);
+			}
+		}
+
+		return PmxLoader::Status::Ok;
+	}
+
 	PmxLoader::Status PmxLoader::Load()
 	{
 		RETURN_IF_ERROR(m_header.ReadHeader(m_infile));
@@ -138,6 +185,7 @@ namespace democollection
 		RETURN_IF_ERROR(LoadIndices());
 		RETURN_IF_ERROR(LoadTextureNames());
 		RETURN_IF_ERROR(LoadMaterials());
+		RETURN_IF_ERROR(LoadBones());
 		return Ok;
 	}
 
@@ -147,37 +195,60 @@ namespace democollection
 		uint32_t vertexCount = 0;
 		READ(vertexCount);
 		m_data.vertices.resize(vertexCount);
-		uint8_t deformType;
-		uint8_t buffer[128];
 		for (vk::Vertex& v : m_data.vertices)
 		{
 			READ(v.position);
 			READ(v.normal);
 			READ(v.texcoord);
 			if (uint8_t cnt = m_header.globals[Header::AdditionalVec4Count])
-				READ_SOME(buffer, sizeof(mth::float4) * cnt);
-			READ(deformType);
-			switch (deformType)
-			{
-			case 0:
-				READ_SOME(buffer, m_header.globals[Header::BoneIndexSize]);
-				break;
-			case 1:
-				READ_SOME(buffer, m_header.globals[Header::BoneIndexSize] * 2 + sizeof(float));
-				break;
-			case 2:
-				READ_SOME(buffer, m_header.globals[Header::BoneIndexSize] * 4 + sizeof(float) * 4);
-				break;
-			case 3:
-				READ_SOME(buffer, m_header.globals[Header::BoneIndexSize] * 2 + sizeof(float) + sizeof(mth::float3) * 3);
-				break;
-			case 4:
-				READ_SOME(buffer, m_header.globals[Header::BoneIndexSize] * 4 + sizeof(float) * 4);
-				break;
-			default:
-				return VertexError;
-			}
-			READ_SOME(buffer, sizeof(float));	// Edge scale
+				infile.ignore(sizeof(mth::float4) * cnt);
+			RETURN_IF_ERROR(LoadVertexBoneData(v));
+			infile.ignore(sizeof(float));	// Edge scale
+		}
+		return Ok;
+	}
+
+	PmxLoader::Status PmxLoader::LoadVertexBoneData(vk::Vertex& vertex)
+	{
+		std::ifstream& infile = m_infile;
+		uint8_t boneIndexSize = m_header.globals[Header::BoneIndexSize];
+		uint8_t deformType;
+		READ(deformType);
+		switch (deformType)
+		{
+		case 0:
+			READ_SOME(&vertex.boneIndices[0], boneIndexSize);
+			vertex.boneWeights[0] = 1.0f;
+			break;
+		case 1:
+			READ_SOME(&vertex.boneIndices[0], boneIndexSize);
+			READ_SOME(&vertex.boneIndices[1], boneIndexSize);
+			READ_SOME(&vertex.boneWeights[0], sizeof(float));
+			vertex.boneWeights[1] = 1.0f - vertex.boneWeights[0];
+			break;
+		case 2:
+			READ_SOME(&vertex.boneIndices[0], boneIndexSize);
+			READ_SOME(&vertex.boneIndices[1], boneIndexSize);
+			READ_SOME(&vertex.boneIndices[2], boneIndexSize);
+			READ_SOME(&vertex.boneIndices[3], boneIndexSize);
+			READ_SOME(vertex.boneWeights, sizeof(vertex.boneWeights));
+			break;
+		case 3:
+			READ_SOME(&vertex.boneIndices[0], boneIndexSize);
+			READ_SOME(&vertex.boneIndices[1], boneIndexSize);
+			READ_SOME(&vertex.boneWeights[0], sizeof(float));
+			vertex.boneWeights[1] = 1.0f - vertex.boneWeights[0];
+			infile.ignore(sizeof(mth::float3) * 3);
+			break;
+		case 4:
+			READ_SOME(&vertex.boneIndices[0], boneIndexSize);
+			READ_SOME(&vertex.boneIndices[1], boneIndexSize);
+			READ_SOME(&vertex.boneIndices[2], boneIndexSize);
+			READ_SOME(&vertex.boneIndices[3], boneIndexSize);
+			READ_SOME(vertex.boneWeights, sizeof(vertex.boneWeights));
+			break;
+		default:
+			return VertexError;
 		}
 		return Ok;
 	}
@@ -227,6 +298,34 @@ namespace democollection
 			m_data.materials[i].data.specularPower = m_materials[i].specularStrength;
 			m_data.materials[i].textureName = m_textureNames[m_materials[i].textureIndex];
 		}
+		return Ok;
+	}
+
+	PmxLoader::Status PmxLoader::LoadBones()
+	{
+		std::ifstream& infile = m_infile;
+		uint32_t boneCount = 0;
+		READ(boneCount);
+		m_bones.resize(boneCount);
+		for (Bone& bone : m_bones)
+			RETURN_IF_ERROR(bone.Read(infile, m_header));
+		std::sort(m_bones.begin(), m_bones.end(), [](const Bone& lhs, const Bone& rhs)->bool{
+			return lhs.parentIndex < rhs.parentIndex;
+		});
+		
+		m_data.skeleton.resize(boneCount);
+		for (uint32_t i = 0; i < boneCount; ++i)
+		{
+			m_data.skeleton[i].toLocalTransform = mth::TranslationInv4x4(m_bones[i].position);
+			m_data.skeleton[i].toGlobalTransform = mth::Translation4x4(m_bones[i].position);
+			if (int parentIdx = m_bones[i].parentIndex > -1)
+			{
+				m_data.skeleton[i].parent = &m_data.skeleton[parentIdx];
+				m_data.skeleton[i].toLocalTransform = m_data.skeleton[i].parent->toLocalTransform * m_data.skeleton[i].toLocalTransform;
+				m_data.skeleton[i].toGlobalTransform = m_data.skeleton[i].toGlobalTransform * m_data.skeleton[i].parent->toGlobalTransform;
+			}
+		}
+
 		return Ok;
 	}
 

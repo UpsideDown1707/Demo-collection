@@ -500,7 +500,7 @@ namespace democollection::mth
 		return m;
 	}
 	template <typename T, size_t R, size_t C>
-	Matrix<T, C, R> Transposed(const Matrix<T, R, C>& matrix)
+	Matrix<T, C, R> Transpose(const Matrix<T, R, C>& matrix)
 	{
 		Matrix<T, C, R> m;
 		for (size_t c = 0; c < C; ++c)
@@ -520,7 +520,18 @@ namespace democollection::mth
 	template <typename T>
 	Matrix<T, 3, 3> Scaling3x3(const Vector<T, 3>& s)
 	{
-		return Scaling(s(0), s(1), s(2));
+		return Scaling3x3(s(0), s(1), s(2));
+	}
+
+	template <typename T>
+	Matrix<T, 3, 3> ScalingInv3x3(const T& x, const T& y, const T& z)
+	{
+		return Scaling3x3(T{1} / x, T{1} / y, T{1} / z);
+	}
+	template <typename T>
+	Matrix<T, 3, 3> ScalingInv3x3(const Vector<T, 3>& s)
+	{
+		return ScalingInv3x3(s(0), s(1), s(2));
 	}
 	template <typename T>
 	Matrix<T, 3, 3> RotationX3x3(const T& a)
@@ -562,6 +573,16 @@ namespace democollection::mth
 	Matrix<T, 3, 3> Rotation3x3(const Vector<T, 3>& r)
 	{
 		return Rotation3x3(r(0), r(1), r(2));
+	}
+	template <typename T>
+	Matrix<T, 3, 3> RotationInv3x3(const T& pitch, const T& yaw, const T& roll)
+	{
+		return Transpose(Rotation3x3(pitch, yaw, roll));
+	}
+	template <typename T>
+	Matrix<T, 3, 3> RotationInv3x3(const Vector<T, 3>& r)
+	{
+		return RotationInv3x3(r(0), r(1), r(2));
 	}
 	template <typename T>
 	Matrix<T, 3, 3> RotationAxis3x3(const Vector<T, 3>& axis, const T& a)
@@ -632,6 +653,16 @@ namespace democollection::mth
 		return Scaling4x4(s(0), s(1), s(2));
 	}
 	template <typename T>
+	Matrix<T, 4, 4> ScalingInv4x4(const T& x, const T& y, const T& z)
+	{
+		return Matrix<T, 4, 4>(ScalingInv3x3(x, y, z));
+	}
+	template <typename T>
+	Matrix<T, 4, 4> ScalingInv4x4(const Vector<T, 3>& s)
+	{
+		return ScalingInv4x4(s(0), s(1), s(2));
+	}
+	template <typename T>
 	Matrix<T, 4, 4> Translation4x4(const T& x, const T& y, const T& z)
 	{
 		return Matrix<T, 4, 4>(
@@ -643,7 +674,17 @@ namespace democollection::mth
 	template <typename T>
 	Matrix<T, 4, 4> Translation4x4(const Vector<T, 3>& t)
 	{
-		return Translation(t(0), t(1), t(2));
+		return Translation4x4(t(0), t(1), t(2));
+	}
+	template <typename T>
+	Matrix<T, 4, 4> TranslationInv4x4(const T& x, const T& y, const T& z)
+	{
+		return Translation4x4(-x, -y, -z);
+	}
+	template <typename T>
+	Matrix<T, 4, 4> TranslationInv4x4(const Vector<T, 3>& t)
+	{
+		return TranslationInv4x4(t(0), t(1), t(2));
 	}
 	template <typename T>
 	Matrix<T, 4, 4> RotationX4x4(const T& a)
@@ -669,6 +710,16 @@ namespace democollection::mth
 	Matrix<T, 4, 4> Rotation4x4(const Vector<T, 3>& r)
 	{
 		return Rotation4x4(r(0), r(1), r(2));
+	}
+	template <typename T>
+	Matrix<T, 4, 4> RotationInv4x4(const T& pitch, const T& yaw, const T& roll)
+	{
+		return Matrix<T, 4, 4>(RotationInv3x3(pitch, yaw, roll));
+	}
+	template <typename T>
+	Matrix<T, 4, 4> RotationInv4x4(const Vector<T, 3>& r)
+	{
+		return RotationInv4x4(r(0), r(1), r(2));
 	}
 	template <typename T>
 	Matrix<T, 4, 4> RotationAxis4x4(const Vector<T, 3>& axis, const T& a)

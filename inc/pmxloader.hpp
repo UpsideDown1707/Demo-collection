@@ -44,18 +44,18 @@ namespace democollection
 			Status ReadSignature(std::ifstream& infile);
 			Status ReadVersion(std::ifstream& infile);
 			Status ReadGlobals(std::ifstream& infile);
-			uint32_t ReadGlobalIndex(std::ifstream& infile, GlobalIndex idx) const;
+			int ReadGlobalIndex(std::ifstream& infile, GlobalIndex idx) const;
 
 		public:
 			Status ReadHeader(std::ifstream& infile);
 
 			std::string ReadText(std::ifstream& infile) const;
-			uint32_t ReadVertexIndex(std::ifstream& infile) const;
-			uint32_t ReadTextureIndex(std::ifstream& infile) const;
-			uint32_t ReadMaterialIndex(std::ifstream& infile) const;
-			uint32_t ReadBoneIndex(std::ifstream& infile) const;
-			uint32_t ReadMorphIndex(std::ifstream& infile) const;
-			uint32_t ReadRigidBodyIndex(std::ifstream& infile) const;
+			int ReadVertexIndex(std::ifstream& infile) const;
+			int ReadTextureIndex(std::ifstream& infile) const;
+			int ReadMaterialIndex(std::ifstream& infile) const;
+			int ReadBoneIndex(std::ifstream& infile) const;
+			int ReadMorphIndex(std::ifstream& infile) const;
+			int ReadRigidBodyIndex(std::ifstream& infile) const;
 		};
 
 		struct Material
@@ -105,6 +105,89 @@ namespace democollection
 			Status Read(std::ifstream& infile, const Header& header);
 		};
 
+		struct Bone
+		{
+			enum BoneFlags
+			{
+				IndexedTailPosition = 1 << 0,
+				Rotatable = 1 << 1,
+				Translatable = 1 << 2,
+				IsVisible = 1 << 3,
+				Enabled = 1 << 4,
+				InverseKinematics = 1 << 5,
+				InheritRotation = 1 << 8,
+				InheritTranslation = 1 << 9,
+				FixedAxis = 1 << 10,
+				LocalCoordinate = 1 << 11,
+				PhysicsAfterDeform = 1 << 12,
+				ExternalParentDeform = 1 << 13
+			};
+
+			struct TailPosition
+			{
+				mth::float3 position;
+				int boneIndex;
+			};
+
+			struct InheritBone
+			{
+				int parentIndex;
+				float influenceWeight;
+			};
+
+			struct BoneFixedAxis
+			{
+				mth::float3 axisDirection;
+			};
+
+			struct BoneLocalCoordinate
+			{
+				mth::float3 x;
+				mth::float3 z;
+			};
+
+			struct BoneExternalParent
+			{
+				int parentIndex;
+			};
+
+			struct IkAngleLimit
+			{
+				mth::float3 minAngle;
+				mth::float3 maxAngle;
+			};
+
+			struct IkLinks
+			{
+				int boneIndex;
+				uint8_t hasLimits;
+				IkAngleLimit limits;
+			};
+
+			struct BoneIk
+			{
+				int targetIndex;
+				int loopCount;
+				float limitRadian;
+				std::vector<IkLinks> ikLinks;
+			};
+
+			std::string jpName;
+			std::string enName;
+			mth::float3 position;
+			int parentIndex;
+			int layer;
+			uint16_t flags;
+			TailPosition tailPosition;
+			InheritBone inheritBone;
+			BoneFixedAxis fixedAxis;
+			BoneLocalCoordinate localCoordinate;
+			BoneExternalParent externalParent;
+			BoneIk inverseKinematics;
+
+			Status Read(std::ifstream& infile, const Header& header);
+		};
+
 	private:
 		ModelData& m_data;
 		std::ifstream m_infile;
@@ -112,14 +195,17 @@ namespace democollection
 		Header m_header;
 		std::vector<std::string> m_textureNames;
 		std::vector<Material> m_materials;
+		std::vector<Bone> m_bones;
 		Status m_status;
 
 	private:
 		Status Load();
 		Status LoadVertices();
+		Status LoadVertexBoneData(vk::Vertex& vertex);
 		Status LoadIndices();
 		Status LoadTextureNames();
 		Status LoadMaterials();
+		Status LoadBones();
 
 	public:
 		PmxLoader(ModelData& modelData, const char filename[]);

@@ -10,35 +10,35 @@ namespace democollection
 	{
 		vertices = {
 				// top
-				vk::Vertex{mth::float3(corner1(0), corner2(1), corner1(2)), mth::float2(0.0f, 0.0f), mth::float3( 0.0f,  1.0f,  0.0f)},
-				vk::Vertex{mth::float3(corner1(0), corner2(1), corner2(2)), mth::float2(0.0f, 1.0f), mth::float3( 0.0f,  1.0f,  0.0f)},
-				vk::Vertex{mth::float3(corner2(0), corner2(1), corner2(2)), mth::float2(1.0f, 1.0f), mth::float3( 0.0f,  1.0f,  0.0f)},
-				vk::Vertex{mth::float3(corner2(0), corner2(1), corner1(2)), mth::float2(1.0f, 0.0f), mth::float3( 0.0f,  1.0f,  0.0f)},
+				vk::Vertex{mth::float3(corner1(0), corner2(1), corner1(2)), mth::float2(0.0f, 0.0f), mth::float3( 0.0f,  1.0f,  0.0f), {}, {}},
+				vk::Vertex{mth::float3(corner1(0), corner2(1), corner2(2)), mth::float2(0.0f, 1.0f), mth::float3( 0.0f,  1.0f,  0.0f), {}, {}},
+				vk::Vertex{mth::float3(corner2(0), corner2(1), corner2(2)), mth::float2(1.0f, 1.0f), mth::float3( 0.0f,  1.0f,  0.0f), {}, {}},
+				vk::Vertex{mth::float3(corner2(0), corner2(1), corner1(2)), mth::float2(1.0f, 0.0f), mth::float3( 0.0f,  1.0f,  0.0f), {}, {}},
 				// bottom
-				vk::Vertex{mth::float3(corner1(0), corner1(1), corner2(2)), mth::float2(0.0f, 0.0f), mth::float3( 0.0f, -1.0f,  0.0f)},
-				vk::Vertex{mth::float3(corner1(0), corner1(1), corner1(2)), mth::float2(0.0f, 1.0f), mth::float3( 0.0f, -1.0f,  0.0f)},
-				vk::Vertex{mth::float3(corner2(0), corner1(1), corner1(2)), mth::float2(1.0f, 1.0f), mth::float3( 0.0f, -1.0f,  0.0f)},
-				vk::Vertex{mth::float3(corner2(0), corner1(1), corner2(2)), mth::float2(1.0f, 0.0f), mth::float3( 0.0f, -1.0f,  0.0f)},
+				vk::Vertex{mth::float3(corner1(0), corner1(1), corner2(2)), mth::float2(0.0f, 0.0f), mth::float3( 0.0f, -1.0f,  0.0f), {}, {}},
+				vk::Vertex{mth::float3(corner1(0), corner1(1), corner1(2)), mth::float2(0.0f, 1.0f), mth::float3( 0.0f, -1.0f,  0.0f), {}, {}},
+				vk::Vertex{mth::float3(corner2(0), corner1(1), corner1(2)), mth::float2(1.0f, 1.0f), mth::float3( 0.0f, -1.0f,  0.0f), {}, {}},
+				vk::Vertex{mth::float3(corner2(0), corner1(1), corner2(2)), mth::float2(1.0f, 0.0f), mth::float3( 0.0f, -1.0f,  0.0f), {}, {}},
 				// front
-				vk::Vertex{mth::float3(corner1(0), corner1(1), corner1(2)), mth::float2(0.0f, 0.0f), mth::float3( 0.0f,  0.0f, -1.0f)},
-				vk::Vertex{mth::float3(corner1(0), corner2(1), corner1(2)), mth::float2(0.0f, 1.0f), mth::float3( 0.0f,  0.0f, -1.0f)},
-				vk::Vertex{mth::float3(corner2(0), corner2(1), corner1(2)), mth::float2(1.0f, 1.0f), mth::float3( 0.0f,  0.0f, -1.0f)},
-				vk::Vertex{mth::float3(corner2(0), corner1(1), corner1(2)), mth::float2(1.0f, 0.0f), mth::float3( 0.0f,  0.0f, -1.0f)},
+				vk::Vertex{mth::float3(corner1(0), corner1(1), corner1(2)), mth::float2(0.0f, 0.0f), mth::float3( 0.0f,  0.0f, -1.0f), {}, {}},
+				vk::Vertex{mth::float3(corner1(0), corner2(1), corner1(2)), mth::float2(0.0f, 1.0f), mth::float3( 0.0f,  0.0f, -1.0f), {}, {}},
+				vk::Vertex{mth::float3(corner2(0), corner2(1), corner1(2)), mth::float2(1.0f, 1.0f), mth::float3( 0.0f,  0.0f, -1.0f), {}, {}},
+				vk::Vertex{mth::float3(corner2(0), corner1(1), corner1(2)), mth::float2(1.0f, 0.0f), mth::float3( 0.0f,  0.0f, -1.0f), {}, {}},
 				// back
-				vk::Vertex{mth::float3(corner2(0), corner1(1), corner2(2)), mth::float2(0.0f, 0.0f), mth::float3( 0.0f,  0.0f,  1.0f)},
-				vk::Vertex{mth::float3(corner2(0), corner2(1), corner2(2)), mth::float2(0.0f, 1.0f), mth::float3( 0.0f,  0.0f,  1.0f)},
-				vk::Vertex{mth::float3(corner1(0), corner2(1), corner2(2)), mth::float2(1.0f, 1.0f), mth::float3( 0.0f,  0.0f,  1.0f)},
-				vk::Vertex{mth::float3(corner1(0), corner1(1), corner2(2)), mth::float2(1.0f, 0.0f), mth::float3( 0.0f,  0.0f,  1.0f)},
+				vk::Vertex{mth::float3(corner2(0), corner1(1), corner2(2)), mth::float2(0.0f, 0.0f), mth::float3( 0.0f,  0.0f,  1.0f), {}, {}},
+				vk::Vertex{mth::float3(corner2(0), corner2(1), corner2(2)), mth::float2(0.0f, 1.0f), mth::float3( 0.0f,  0.0f,  1.0f), {}, {}},
+				vk::Vertex{mth::float3(corner1(0), corner2(1), corner2(2)), mth::float2(1.0f, 1.0f), mth::float3( 0.0f,  0.0f,  1.0f), {}, {}},
+				vk::Vertex{mth::float3(corner1(0), corner1(1), corner2(2)), mth::float2(1.0f, 0.0f), mth::float3( 0.0f,  0.0f,  1.0f), {}, {}},
 				// left
-				vk::Vertex{mth::float3(corner1(0), corner1(1), corner2(2)), mth::float2(0.0f, 0.0f), mth::float3(-1.0f,  0.0f,  0.0f)},
-				vk::Vertex{mth::float3(corner1(0), corner2(1), corner2(2)), mth::float2(0.0f, 1.0f), mth::float3(-1.0f,  0.0f,  0.0f)},
-				vk::Vertex{mth::float3(corner1(0), corner2(1), corner1(2)), mth::float2(1.0f, 1.0f), mth::float3(-1.0f,  0.0f,  0.0f)},
-				vk::Vertex{mth::float3(corner1(0), corner1(1), corner1(2)), mth::float2(1.0f, 0.0f), mth::float3(-1.0f,  0.0f,  0.0f)},
+				vk::Vertex{mth::float3(corner1(0), corner1(1), corner2(2)), mth::float2(0.0f, 0.0f), mth::float3(-1.0f,  0.0f,  0.0f), {}, {}},
+				vk::Vertex{mth::float3(corner1(0), corner2(1), corner2(2)), mth::float2(0.0f, 1.0f), mth::float3(-1.0f,  0.0f,  0.0f), {}, {}},
+				vk::Vertex{mth::float3(corner1(0), corner2(1), corner1(2)), mth::float2(1.0f, 1.0f), mth::float3(-1.0f,  0.0f,  0.0f), {}, {}},
+				vk::Vertex{mth::float3(corner1(0), corner1(1), corner1(2)), mth::float2(1.0f, 0.0f), mth::float3(-1.0f,  0.0f,  0.0f), {}, {}},
 				// right
-				vk::Vertex{mth::float3(corner2(0), corner1(1), corner1(2)), mth::float2(0.0f, 0.0f), mth::float3( 1.0f,  0.0f,  0.0f)},
-				vk::Vertex{mth::float3(corner2(0), corner2(1), corner1(2)), mth::float2(0.0f, 1.0f), mth::float3( 1.0f,  0.0f,  0.0f)},
-				vk::Vertex{mth::float3(corner2(0), corner2(1), corner2(2)), mth::float2(1.0f, 1.0f), mth::float3( 1.0f,  0.0f,  0.0f)},
-				vk::Vertex{mth::float3(corner2(0), corner1(1), corner2(2)), mth::float2(1.0f, 0.0f), mth::float3( 1.0f,  0.0f,  0.0f)}
+				vk::Vertex{mth::float3(corner2(0), corner1(1), corner1(2)), mth::float2(0.0f, 0.0f), mth::float3( 1.0f,  0.0f,  0.0f), {}, {}},
+				vk::Vertex{mth::float3(corner2(0), corner2(1), corner1(2)), mth::float2(0.0f, 1.0f), mth::float3( 1.0f,  0.0f,  0.0f), {}, {}},
+				vk::Vertex{mth::float3(corner2(0), corner2(1), corner2(2)), mth::float2(1.0f, 1.0f), mth::float3( 1.0f,  0.0f,  0.0f), {}, {}},
+				vk::Vertex{mth::float3(corner2(0), corner1(1), corner2(2)), mth::float2(1.0f, 0.0f), mth::float3( 1.0f,  0.0f,  0.0f), {}, {}}
 		};
 		indices = {
 				 0,  1,  2,  2,  3,  0,
@@ -69,7 +69,9 @@ namespace democollection
 				vertices[arrayLocationCounter++] = vk::Vertex{
 					mth::float3(corner1(0) + scaling(0) * size(0), plainY, corner1(1) + scaling(1) * size(1)),
 					scaling,
-					mth::float3(0.0f, 1.0f, 0.0f)
+					mth::float3(0.0f, 1.0f, 0.0f),
+					{},
+					{}
 				};
 			}
 		}
@@ -105,7 +107,9 @@ namespace democollection
 		vertices[0] = vk::Vertex{
 			center + mth::float3(0.0f, radius(1), 0.0f),
 			mth::float2(0.5f, 0.0f),
-			mth::float3(0.0f, 1.0f, 0.0f)
+			mth::float3(0.0f, 1.0f, 0.0f),
+			{},
+			{}
 		};
 		arrayLocationCounter = 1;
 		for (uint32_t v = 1; v < latitudeCount - 1; ++v)
@@ -126,14 +130,18 @@ namespace democollection
 				vertices[arrayLocationCounter++] = vk::Vertex{
 					center + normal * radius,
 					scaling,
-					normal * normalScaler
+					normal * normalScaler,
+			{},
+			{}
 				};
 			}
 		}
 		vertices[arrayLocationCounter] = vk::Vertex{
 			center + mth::float3(0.0f, -radius(1), 0.0f),
 			mth::float2(0.5f, 1.0f),
-			mth::float3(0.0f, -1.0f, 0.0f)
+			mth::float3(0.0f, -1.0f, 0.0f),
+			{},
+			{}
 		};
 
 		arrayLocationCounter = 0;
@@ -179,7 +187,7 @@ namespace democollection
 
 	void ModelLoader::Transform(const mth::float4x4& matrix)
 	{
-		mth::float3x3 normalMat = mth::Transposed(mth::Inverse(mth::float3x3(matrix)));
+		mth::float3x3 normalMat = mth::Transpose(mth::Inverse(mth::float3x3(matrix)));
 		normalMat /= mth::Determinant(normalMat);
 		for (vk::Vertex& v : vertices)
 		{

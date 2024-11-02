@@ -24,6 +24,10 @@ namespace democollection::vk
 		std::unique_ptr<Mesh> m_mesh;
 		std::unique_ptr<DescriptorPool> m_descriptorPool;
 		std::vector<ModelPart> m_parts;
+		std::vector<vk::Bone> m_skeleton;
+
+	private:
+		mth::float4x4& BoneTransforms(int index) const;
 
 	public:
 		Model(Graphics& graphics,
@@ -31,6 +35,7 @@ namespace democollection::vk
 				const UniformBuffer& sceneBufferFs,
 				const ModelLoader& modelLoader);
 
+		void Update();
 		void Render() const;
 	};
 }

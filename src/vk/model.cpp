@@ -3,13 +3,18 @@
 
 namespace democollection::vk
 {
+	mth::float4x4& Model::BoneTransforms(int index) const
+	{
+		return m_vsBuffer->Data<mth::float4x4>()[index];
+	}
+
 	Model::Model(Graphics& graphics,
 			const UniformBuffer& sceneBufferVs,
 			const UniformBuffer& sceneBufferFs,
 			const ModelLoader& modelLoader)
 		: m_graphics{graphics}
 	{
-		m_vsBuffer = std::make_unique<UniformBuffer>(graphics, sizeof(ModelBufferVs));
+		m_vsBuffer = std::make_unique<UniformBuffer>(graphics, sizeof(mth::float4x4) * modelLoader.Skeleton().size());
 
 		m_mesh = std::make_unique<Mesh>(graphics,
 				modelLoader.Vertices().data(), static_cast<uint32_t>(modelLoader.Vertices().size()),
@@ -26,6 +31,14 @@ namespace democollection::vk
 			m_parts[i].texture = graphics.LoadTexture(materials[i].textureName);
 			m_parts[i].descriptorSet = std::make_unique<DescriptorSet>(graphics, *m_descriptorPool, sceneBufferVs, *m_vsBuffer, sceneBufferFs, *m_parts[i].fsBuffer, *m_parts[i].texture);
 		}
+
+		m_skeleton = modelLoader.Skeleton();
+	}
+
+	void Model::Update()
+	{
+		for (size_t i = 0; i < m_skeleton.size(); ++i)
+			BoneTransforms(i) = m_skeleton[i].toGlobalTransform * (m_skeleton[i].boneTransform * m_skeleton[i].toLocalTransform);
 	}
 
 	void Model::Render() const

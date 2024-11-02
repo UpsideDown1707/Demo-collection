@@ -11,11 +11,14 @@ namespace democollection
 		const std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
 
 		vk::SceneBufferVs& sceneBufferVs = *m_sceneBufferVs->Data<vk::SceneBufferVs>();
-		sceneBufferVs.cameraMatrix = mth::Transposed(m_camera.CameraMatrix());
+		sceneBufferVs.cameraMatrix = mth::Transpose(m_camera.CameraMatrix());
 
 		vk::SceneBufferFs& sceneBufferFs = *m_sceneBufferFs->Data<vk::SceneBufferFs>();
 		sceneBufferFs.lightColor = mth::float4(1.0f);
 		sceneBufferFs.lightPosition = mth::float4(m_camera.position(0), m_camera.position(1), m_camera.position(2), 1.0f);
+
+		if (m_model)
+			m_model->Update();
 
 		//std::cout << 1.0f / std::chrono::duration<float>(now - m_prevFrameTime).count() << std::endl;
 		m_prevFrameTime = now;

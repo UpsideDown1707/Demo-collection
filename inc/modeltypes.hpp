@@ -18,5 +18,6 @@ namespace democollection
 		std::vector<vk::Vertex> vertices;
 		std::vector<uint32_t> indices;
 		std::vector<MaterialData> materials;
+		std::vector<vk::Bone> skeleton;
 	};
 }
