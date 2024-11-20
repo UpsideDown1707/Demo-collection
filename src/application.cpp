@@ -2,6 +2,7 @@
 #include "mth/linalg.hpp"
 #include "modelloader.hpp"
 #include "image.hpp"
+#include "vpdloader.hpp"
 #include <iostream>
 
 namespace democollection
@@ -102,6 +103,14 @@ namespace democollection
 			ModelLoader ml;
 			if (ml.LoadPmx(argv[1]))
 				m_model = std::make_unique<vk::Model>(*m_graphics, *m_sceneBufferVs, *m_sceneBufferFs, ml);
+		}
+
+		if (argc > 2 && m_model)
+		{
+			VpdLoader pose(argv[2]);
+			for 
+			(const VpdLoader::Bone& b : pose.Bones())
+				m_model->SetBoneTransform(b.boneName, mth::RotationQuaternion4x4(b.rotation) * mth::Translation4x4(b.translation));
 		}
 
 		m_camera.UpdateScreenResolution(width, height);

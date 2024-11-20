@@ -15,6 +15,7 @@ namespace democollection::vk
 
 	struct Bone
 	{
+		std::string name;
 		mth::float4x4 toLocalTransform = mth::Identity<float, 4>();
 		mth::float4x4 boneTransform = mth::Identity<float, 4>();
 		mth::float4x4 toGlobalTransform = mth::Identity<float, 4>();

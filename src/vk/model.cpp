@@ -1,5 +1,6 @@
 #include "vk/model.hpp"
 #include "image.hpp"
+#include <iostream>
 
 namespace democollection::vk
 {
@@ -35,10 +36,17 @@ namespace democollection::vk
 		m_skeleton = modelLoader.Skeleton();
 	}
 
+	void Model::SetBoneTransform(const std::string& boneName, const mth::float4x4& transform)
+	{
+		for (vk::Bone& b : m_skeleton)
+			if (0 == strcmp(b.name.c_str(), boneName.c_str()))
+				b.boneTransform = transform;
+	}
+
 	void Model::Update()
 	{
 		for (size_t i = 0; i < m_skeleton.size(); ++i)
-			BoneTransforms(i) = m_skeleton[i].toGlobalTransform * (m_skeleton[i].boneTransform * m_skeleton[i].toLocalTransform);
+			BoneTransforms(i) = mth::Transpose(m_skeleton[i].toGlobalTransform * (m_skeleton[i].boneTransform * m_skeleton[i].toLocalTransform));
 	}
 
 	void Model::Render() const

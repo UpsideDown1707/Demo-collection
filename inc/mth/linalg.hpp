@@ -585,6 +585,19 @@ namespace democollection::mth
 		return RotationInv3x3(r(0), r(1), r(2));
 	}
 	template <typename T>
+	Matrix<T, 3, 3> RotationQuaternion3x3(const Vector<T, 4>& quat)
+	{
+		T s = T{1} / LengthSquare(quat);
+		const T& qr = quat(3);
+		const T& qi = quat(0);
+		const T& qj = quat(1);
+		const T& qk = quat(2);
+		return Matrix<T, 3, 3>(
+			s - (qj * qj + qk  *qk), T{2} * s * (qi * qj - qk * qr), T{2} * s * (qi * qk + qj * qr),
+			T{2} * s * (qi * qj + qk * qr), s - (qi * qi + qk  *qk), T{2} * s * (qj * qk - qi * qr),
+			T{2} * s * (qi * qk - qj * qr), T{2} * s * (qj * qk + qi * qr), s - (qi * qi + qj  *qj));
+	}
+	template <typename T>
 	Matrix<T, 3, 3> RotationAxis3x3(const Vector<T, 3>& axis, const T& a)
 	{
 		return RotationNormal(Normalized(axis), a);
@@ -720,6 +733,11 @@ namespace democollection::mth
 	Matrix<T, 4, 4> RotationInv4x4(const Vector<T, 3>& r)
 	{
 		return RotationInv4x4(r(0), r(1), r(2));
+	}
+	template <typename T>
+	Matrix<T, 4, 4> RotationQuaternion4x4(const Vector<T, 4>& quat)
+	{
+		return Matrix<T, 4, 4>(RotationQuaternion3x3(quat));
 	}
 	template <typename T>
 	Matrix<T, 4, 4> RotationAxis4x4(const Vector<T, 3>& axis, const T& a)

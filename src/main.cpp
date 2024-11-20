@@ -1,5 +1,6 @@
 #include "application.hpp"
 #include <iostream>
+#include "shiftjisconvert.hpp"
 
 int main(int argc, char* argv[])
 {

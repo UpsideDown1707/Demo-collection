@@ -309,9 +309,6 @@ namespace democollection
 		m_bones.resize(boneCount);
 		for (Bone& bone : m_bones)
 			RETURN_IF_ERROR(bone.Read(infile, m_header));
-		std::sort(m_bones.begin(), m_bones.end(), [](const Bone& lhs, const Bone& rhs)->bool{
-			return lhs.parentIndex < rhs.parentIndex;
-		});
 		
 		m_data.skeleton.resize(boneCount);
 		for (uint32_t i = 0; i < boneCount; ++i)
@@ -320,6 +317,7 @@ namespace democollection
 			m_data.skeleton[i].toGlobalTransform = mth::Translation4x4(m_bones[i].position);
 			if (int parentIdx = m_bones[i].parentIndex > -1)
 			{
+				m_data.skeleton[i].name = m_bones[i].jpName;
 				m_data.skeleton[i].parent = &m_data.skeleton[parentIdx];
 				m_data.skeleton[i].toLocalTransform = m_data.skeleton[i].parent->toLocalTransform * m_data.skeleton[i].toLocalTransform;
 				m_data.skeleton[i].toGlobalTransform = m_data.skeleton[i].toGlobalTransform * m_data.skeleton[i].parent->toGlobalTransform;
