@@ -35,7 +35,9 @@ namespace democollection::vk
 				const UniformBuffer& sceneBufferFs,
 				const ModelLoader& modelLoader);
 
-		void SetBoneTransform(const std::string& boneName, const mth::float4x4& transform);
+		void ClearBoneTransforms();
+		void SetBoneTransform(const std::string& boneName, const mth::float3 translation, const mth::float4& rotation);
+		void UpdateInheritTransforms();
 
 		void Update();
 		void Render() const;

@@ -36,17 +36,48 @@ namespace democollection::vk
 		m_skeleton = modelLoader.Skeleton();
 	}
 
-	void Model::SetBoneTransform(const std::string& boneName, const mth::float4x4& transform)
+	void Model::ClearBoneTransforms()
 	{
 		for (vk::Bone& b : m_skeleton)
+		{
+			b.translation = mth::float3(0.0f, 0.0f, 0.0f);
+			b.rotation = mth::float4(0.0f, 0.0f, 0.0f, 1.0f);
+		}
+	}
+
+	void Model::SetBoneTransform(const std::string& boneName, const mth::float3 translation, const mth::float4& rotation)
+	{
+		for (vk::Bone& b : m_skeleton)
+		{
 			if (0 == strcmp(b.name.c_str(), boneName.c_str()))
-				b.boneTransform = transform;
+			{
+				b.translation = translation;
+				b.rotation = rotation;
+			}
+		}
+	}
+
+	void Model::UpdateInheritTransforms()
+	{
+		for (vk::Bone& b : m_skeleton)
+		{
+			if (b.inheritTranslationIdx > -1)
+				b.translation += m_skeleton[b.inheritTranslationIdx].translation * b.inheritTranslationWeight;
+			if (b.inheritRotationIdx > -1)
+				b.rotation = mth::Slerp(b.rotation, m_skeleton[b.inheritRotationIdx].rotation, b.inheritRotationWeight);
+		}
 	}
 
 	void Model::Update()
 	{
 		for (size_t i = 0; i < m_skeleton.size(); ++i)
-			BoneTransforms(i) = mth::Transpose(m_skeleton[i].toGlobalTransform * (m_skeleton[i].boneTransform * m_skeleton[i].toLocalTransform));
+		{
+			Bone& b = m_skeleton[i];
+			b.boneTransform = b.toParentTransform * (mth::Translation4x4(b.translation) * mth::RotationQuaternion4x4(b.rotation));
+			if (b.parentIdx >= 0)
+				b.boneTransform = m_skeleton[b.parentIdx].boneTransform * b.boneTransform;
+			BoneTransforms(i) = mth::Transpose(b.boneTransform * b.toLocalTransform);
+		}
 	}
 
 	void Model::Render() const

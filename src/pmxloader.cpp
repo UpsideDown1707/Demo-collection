@@ -313,15 +313,26 @@ namespace democollection
 		m_data.skeleton.resize(boneCount);
 		for (uint32_t i = 0; i < boneCount; ++i)
 		{
+			m_data.skeleton[i].name = m_bones[i].jpName;
 			m_data.skeleton[i].toLocalTransform = mth::TranslationInv4x4(m_bones[i].position);
-			m_data.skeleton[i].toGlobalTransform = mth::Translation4x4(m_bones[i].position);
-			if (int parentIdx = m_bones[i].parentIndex > -1)
+			m_data.skeleton[i].parentIdx = m_bones[i].parentIndex;
+			if (m_bones[i].flags & Bone::BoneFlags::InheritTranslation)
 			{
-				m_data.skeleton[i].name = m_bones[i].jpName;
-				m_data.skeleton[i].parent = &m_data.skeleton[parentIdx];
-				m_data.skeleton[i].toLocalTransform = m_data.skeleton[i].parent->toLocalTransform * m_data.skeleton[i].toLocalTransform;
-				m_data.skeleton[i].toGlobalTransform = m_data.skeleton[i].toGlobalTransform * m_data.skeleton[i].parent->toGlobalTransform;
+				m_data.skeleton[i].inheritTranslationIdx = m_bones[i].inheritBone.parentIndex;
+				m_data.skeleton[i].inheritTranslationWeight = m_bones[i].inheritBone.influenceWeight;
 			}
+			if (m_bones[i].flags & Bone::BoneFlags::InheritRotation)
+			{
+				m_data.skeleton[i].inheritRotationIdx = m_bones[i].inheritBone.parentIndex;
+				m_data.skeleton[i].inheritRotationWeight = m_bones[i].inheritBone.influenceWeight;
+			}
+
+			m_data.skeleton[i].translation = mth::float3(0.0f, 0.0f, 0.0f);
+			m_data.skeleton[i].rotation = mth::float4(0.0f, 0.0f, 0.0f, 1.0f);
+			if (m_bones[i].parentIndex < 0)
+				m_data.skeleton[i].toParentTransform = mth::Translation4x4(m_bones[i].position);
+			else
+				m_data.skeleton[i].toParentTransform = mth::Translation4x4(m_bones[i].position - m_bones[m_bones[i].parentIndex].position);
 		}
 
 		return Ok;

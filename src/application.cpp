@@ -108,9 +108,10 @@ namespace democollection
 		if (argc > 2 && m_model)
 		{
 			VpdLoader pose(argv[2]);
-			for 
-			(const VpdLoader::Bone& b : pose.Bones())
-				m_model->SetBoneTransform(b.boneName, mth::RotationQuaternion4x4(b.rotation) * mth::Translation4x4(b.translation));
+			m_model->ClearBoneTransforms();
+			for (const VpdLoader::Bone& b : pose.Bones())
+				m_model->SetBoneTransform(b.boneName, b.translation, b.rotation);
+			m_model->UpdateInheritTransforms();
 		}
 
 		m_camera.UpdateScreenResolution(width, height);

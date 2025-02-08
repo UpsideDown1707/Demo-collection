@@ -16,10 +16,16 @@ namespace democollection::vk
 	struct Bone
 	{
 		std::string name;
+		mth::float3 translation;
+		mth::float4 rotation;
 		mth::float4x4 toLocalTransform = mth::Identity<float, 4>();
 		mth::float4x4 boneTransform = mth::Identity<float, 4>();
-		mth::float4x4 toGlobalTransform = mth::Identity<float, 4>();
-		Bone* parent = nullptr;
+		mth::float4x4 toParentTransform = mth::Identity<float, 4>();
+		int parentIdx = -1;
+		int inheritTranslationIdx = -1;
+		float inheritTranslationWeight = 0.0f;
+		int inheritRotationIdx = -1;
+		float inheritRotationWeight = 0.0f;
 	};
 
 	struct SceneBufferVs

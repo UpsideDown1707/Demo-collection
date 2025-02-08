@@ -49,6 +49,13 @@ namespace democollection::mth
 		{
 			return S;
 		}
+		Vector<T, S> operator-() const
+		{
+			Vector<T, S> r;
+			for (size_t i = 0; i < S; ++i)
+				r.m_vec[i] = -m_vec[i];
+			return r;
+		}
 		Vector<T, S> operator+(const Vector<T, S>& v) const
 		{
 			Vector<T, S> r;
@@ -213,7 +220,7 @@ namespace democollection::mth
 	template <typename T, size_t S>
 	Vector<T, S> operator*(const T& v, const Vector<T, S>& n)
 	{
-		return v * n;
+		return n * v;
 	}
 	template <typename T, size_t S>
 	std::ostream& operator<<(std::ostream& os, const Vector<T, S>& v)
@@ -223,6 +230,37 @@ namespace democollection::mth
 			os << ' ' << v(i);
 		os << ')' << std::endl;
 		return os;
+	}
+	template <typename T>
+	T Lerp(const T& v1, const T& v2, const T& a)
+	{
+		return v1 * (T{1} - a) + v2 * a;
+	}
+	template <typename T, size_t S>
+	Vector<T, S> Lerp(const Vector<T, S>& v1, const Vector<T, S>& v2, const T& a)
+	{
+		Vector<T, S> v;
+		for (size_t i = 0; i < S; ++i)
+			v(i) = Lerp(v1(i), v2(i), a);
+		return v;
+	}
+	template <typename T>
+	Vector<T, 4> Slerp(const Vector<T, 4>& v1, const Vector<T, 4>& v2, const T& a)
+	{
+		Vector<T, 4> v3 = v2;
+		T cosTheta = Dot(v1, v2);
+
+		if (cosTheta < T{0})
+		{
+			v3 = -v2;
+			cosTheta = -cosTheta;
+		}
+
+		if (cosTheta > T{0.999})
+			return Lerp(v1, v3, a);
+		
+		const T angle = std::acos(cosTheta);
+		return (std::sin((T{1} - a) * angle) * v1 + std::sin(a * angle) * v3) / std::sin(angle);
 	}
 
 	using float2 = Vector<float, 2>;
@@ -587,15 +625,16 @@ namespace democollection::mth
 	template <typename T>
 	Matrix<T, 3, 3> RotationQuaternion3x3(const Vector<T, 4>& quat)
 	{
-		T s = T{1} / LengthSquare(quat);
-		const T& qr = quat(3);
-		const T& qi = quat(0);
-		const T& qj = quat(1);
-		const T& qk = quat(2);
+		const T lenInv = T{1} / Length(quat);
+		const T& qr = lenInv * quat(3);
+		const T& qi = lenInv * quat(0);
+		const T& qj = lenInv * quat(1);
+		const T& qk = lenInv * quat(2);
 		return Matrix<T, 3, 3>(
-			s - (qj * qj + qk  *qk), T{2} * s * (qi * qj - qk * qr), T{2} * s * (qi * qk + qj * qr),
-			T{2} * s * (qi * qj + qk * qr), s - (qi * qi + qk  *qk), T{2} * s * (qj * qk - qi * qr),
-			T{2} * s * (qi * qk - qj * qr), T{2} * s * (qj * qk + qi * qr), s - (qi * qi + qj  *qj));
+			T{2} * (qr * qr + qi * qi) - T{1}, T{2} * (qi * qj - qr * qk), T{2} * (qi * qk + qr * qj),
+			T{2} * (qi * qj + qr * qk), T{2} * (qr * qr + qj * qj) - T{1}, T{2} * (qj * qk - qr * qi),
+			T{2} * (qi * qk - qr * qj), T{2} * (qj * qk + qr * qi), T{2} * (qr * qr + qk * qk) - T{1}
+		);
 	}
 	template <typename T>
 	Matrix<T, 3, 3> RotationAxis3x3(const Vector<T, 3>& axis, const T& a)
